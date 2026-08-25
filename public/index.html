@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Spark Snatch</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="shell">
+    <header><a class="brand" href="/">SPARK<span>SNATCH</span></a><p>the tiny game of quick hands</p></header>
+    <section id="landing" class="landing">
+      <div class="intro"><p class="eyebrow">01 MINUTE · 02+ PLAYERS</p><h1>See a spark.<br><i>Snatch it.</i></h1><p class="lede">Race your friends to claim the glowing spark. Most sparks after one minute wins eternal bragging rights.</p></div>
+      <div class="join-card">
+        <label>Your name<input id="name" maxlength="16" placeholder="e.g. Maja" autocomplete="nickname"></label>
+        <button id="create" class="primary">Create a game <b>→</b></button>
+        <div class="or">or join a friend</div>
+        <div class="join-row"><input id="code" maxlength="4" placeholder="ROOM CODE"><button id="join">Join</button></div>
+        <p id="error" class="error"></p>
+      </div>
+    </section>
+    <section id="game" hidden>
+      <div class="game-top"><div><p class="eyebrow">ROOM <span id="room-code"></span></p><h2 id="status">Waiting for challengers</h2></div><div id="timer" class="timer">1:00</div></div>
+      <div class="arena-wrap"><div id="arena" class="arena"><div class="grid"></div><button id="spark" aria-label="Claim the spark" hidden></button><div id="arena-message" class="arena-message"></div></div></div>
+      <div class="bottom"><section><p class="eyebrow">SCOREBOARD</p><div id="players" class="players"></div></section><section class="controls"><button id="start" class="primary">Start the showdown <b>→</b></button><button id="again" class="primary" hidden>Play again <b>↻</b></button><p id="host-note"></p><button id="copy" class="share">Copy invite link</button></section></div>
+    </section>
+  </main>
+  <template id="player-template"><div class="player"><span class="dot"></span><span class="player-name"></span><b class="score">0</b></div></template>
+  <script src="app.js"></script>
+</body>
+</html>
