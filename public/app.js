@@ -31,9 +31,10 @@ function render() {
   const spark = $('#spark'), msg = $('#arena-message'); spark.hidden = room.phase !== 'playing' || !room.spark;
   if (room.spark) { spark.style.left = room.spark.x + '%'; spark.style.top = room.spark.y + '%'; spark.textContent = room.spark.kind; }
   if (room.phase === 'lobby') msg.innerHTML = 'Invite a friend to your room<small>Room code: ' + room.code + '</small>';
+  if (room.phase === 'countdown') msg.innerHTML = 'Get ready!<small>The sparks arrive in ' + Math.max(1, Math.ceil((room.startAt - Date.now()) / 1000)) + '</small>';
   if (room.phase === 'playing') msg.textContent = '';
   if (room.phase === 'finished') { const best = Math.max(...room.players.map(p => p.score)); const winners = room.players.filter(p => p.score === best).map(p => p.name).join(' & '); msg.innerHTML = (winners + (winners.includes('&') ? ' tie!' : ' wins!')) + '<small>' + best + ' sparks claimed</small>'; }
-  clearInterval(clock); if (room.phase === 'playing') { tick(); clock = setInterval(tick, 250); } else $('#timer').textContent = room.phase === 'finished' ? 'DONE' : '1:00';
+  clearInterval(clock); if (room.phase === 'playing' || room.phase === 'countdown') { tick(); clock = setInterval(tick, 250); } else $('#timer').textContent = room.phase === 'finished' ? 'DONE' : '1:00';
 }
-function tick() { const seconds = Math.max(0, Math.ceil((room.endsAt - Date.now()) / 1000)); $('#timer').textContent = '0:' + String(seconds).padStart(2,'0'); }
+function tick() { const countdown = room.phase === 'countdown'; const seconds = Math.max(0, Math.ceil(((countdown ? room.startAt : room.endsAt) - Date.now()) / 1000)); $('#timer').textContent = countdown ? String(seconds) : '0:' + String(seconds).padStart(2,'0'); if (countdown) $('#arena-message').innerHTML = 'Get ready!<small>The sparks arrive in ' + Math.max(1, seconds) + '</small>'; }
 const queryRoom = new URLSearchParams(location.search).get('room'); if (queryRoom) { codeInput.value = queryRoom.toUpperCase(); }
