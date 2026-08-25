@@ -15,6 +15,7 @@ function state(room) {
     code: room.code,
     host: room.host,
     phase: room.phase,
+    startAt: room.startAt,
     endsAt: room.endsAt,
     spark: room.spark,
     players: [...room.players.values()].map(({ id, name, score, color }) => ({ id, name, score, color }))
@@ -33,6 +34,15 @@ function finishRound(room) {
   if (room.phase !== 'playing') return;
   room.phase = 'finished';
   room.spark = null;
+  broadcast(room);
+}
+function beginRound(room) {
+  if (room.phase !== 'countdown') return;
+  room.phase = 'playing';
+  room.startAt = null;
+  room.endsAt = Date.now() + 60000;
+  room.spark = nextSpark();
+  room.timer = setTimeout(() => finishRound(room), 60500);
   broadcast(room);
 }
 
@@ -60,11 +70,12 @@ function handle(socket, message) {
   if (type === 'start') {
     const room = roomFor(socket);
     if (!room || room.host !== socket.id || room.players.size < 2) return;
-    room.phase = 'playing';
-    room.endsAt = Date.now() + 60000;
-    room.spark = nextSpark();
+    room.phase = 'countdown';
+    room.startAt = Date.now() + 5000;
+    room.endsAt = null;
+    room.spark = null;
     clearTimeout(room.timer);
-    room.timer = setTimeout(() => finishRound(room), 60500);
+    room.timer = setTimeout(() => beginRound(room), 5000);
     broadcast(room);
   }
 
@@ -83,7 +94,8 @@ function handle(socket, message) {
     const room = roomFor(socket);
     if (!room || room.host !== socket.id) return;
     for (const player of room.players.values()) player.score = 0;
-    room.phase = 'lobby'; room.spark = null; room.endsAt = null;
+    clearTimeout(room.timer);
+    room.phase = 'lobby'; room.spark = null; room.startAt = null; room.endsAt = null;
     broadcast(room);
   }
 }
