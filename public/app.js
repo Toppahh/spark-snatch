@@ -1,10 +1,14 @@
 const socket = new WebSocket((location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host);
 socket.id = null; let request = 0; const callbacks = new Map();
 socket.onmessage = ({ data }) => { const message = JSON.parse(data); if (message.type === 'state') { room = message.data; render(); } if (message.type === 'reply') { const cb = callbacks.get(message.data.requestId); if (cb) { callbacks.delete(message.data.requestId); cb(message.data); } } };
-function emit(type, data, callback) { const requestId = ++request; if (callback) callbacks.set(requestId, callback); socket.send(JSON.stringify({ type, data, requestId })); }
+function setConnection(ready) { $('#create').disabled = !ready; $('#join').disabled = !ready; if (!ready) error.textContent = 'Connecting to game…'; else if (error.textContent === 'Connecting to game…') error.textContent = ''; }
+socket.onopen = () => setConnection(true);
+socket.onclose = () => { setConnection(false); error.textContent = 'Connection lost. Refresh to try again.'; };
+function emit(type, data, callback) { if (socket.readyState !== WebSocket.OPEN) return setConnection(false); const requestId = ++request; if (callback) callbacks.set(requestId, callback); socket.send(JSON.stringify({ type, data, requestId })); }
 let myId, room, clock;
 const $ = s => document.querySelector(s);
 const nameInput = $('#name'), codeInput = $('#code'), error = $('#error');
+setConnection(socket.readyState === WebSocket.OPEN);
 
 function name() { return nameInput.value.trim() || 'Player'; }
 function enter(data) { myId = data.playerId; room = data.state; $('#landing').hidden = true; $('#game').hidden = false; $('#room-code').textContent = data.code; render(); }
